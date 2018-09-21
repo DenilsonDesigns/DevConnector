@@ -5,6 +5,8 @@ const passport = require("passport");
 
 //LOAD VALIDATION
 const validateProfileInput = require("../../validation/profile");
+const validateExperienceInput = require("../../validation/experience");
+const validateEducationInput = require("../../validation/education");
 
 //Load profile model
 const Profile = require("../../models/Profile");
@@ -163,6 +165,151 @@ router.post(
           });
         });
       }
+    });
+  }
+);
+
+//POST- api/profile/experience
+//Add experience to profile
+//Access- private
+router.post(
+  "/experience",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    //VALIDATE POSRT REQUEST
+    const { errors, isValid } = validateExperienceInput(req.body);
+
+    //CHECK VALIDATIOn
+    if (!isValid) {
+      //RETURN ANY ERRORS WITH 400
+      return res.status(400).json(errors);
+    }
+    //SEARCH MONGO COLLECTION FOR EXPERIENC OF USER
+    Profile.findOne({ user: req.user.id }).then(profile => {
+      //ADDING NEW EXPERIENCE FROM BODY
+      const newExp = {
+        title: req.body.title,
+        company: req.body.company,
+        location: req.body.location,
+        from: req.body.from,
+        to: req.body.to,
+        current: req.body.current,
+        description: req.body.description
+      };
+
+      //ADD TO EXPERIENCE ARRAY
+      profile.experience.unshift(newExp);
+      profile.save().then(profile => {
+        res.json(profile);
+      });
+    });
+  }
+);
+
+//POST- api/profile/education
+//Add education to profile
+//Access- private
+router.post(
+  "/education",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    //VALIDATE POSRT REQUEST
+    const { errors, isValid } = validateEducationInput(req.body);
+
+    //CHECK VALIDATIOn
+    if (!isValid) {
+      //RETURN ANY ERRORS WITH 400
+      return res.status(400).json(errors);
+    }
+    //SEARCH MONGO COLLECTION FOR EXPERIENC OF USER
+    Profile.findOne({ user: req.user.id }).then(profile => {
+      //ADDING NEW EXPERIENCE FROM BODY
+      const newEdu = {
+        school: req.body.degree,
+        degree: req.body.degree,
+        fieldofstudy: req.body.fieldofstudy,
+        from: req.body.from,
+        to: req.body.to,
+        current: req.body.current,
+        description: req.body.description
+      };
+
+      //ADD TO EXPERIENCE ARRAY
+      profile.education.unshift(newEdu);
+      profile.save().then(profile => {
+        res.json(profile);
+      });
+    });
+  }
+);
+
+//DELETE- api/profile/experience/:exp_id
+//Delete experience from profile
+//Access- private
+router.delete(
+  "/experience/:exp_id",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    //SEARCH MONGO FOR USER PROFILE FIRST
+    Profile.findOne({ user: req.user.id }).then(profile => {
+      //GET REMOVE INDEX
+      const removeIndex = profile.experience
+        .map(item => item.id)
+        .indexOf(req.params.exp_id);
+
+      //SPLICE OUT OF ARRAY
+      profile.experience.splice(removeIndex, 1);
+
+      //SAVE
+      profile
+        .save()
+        .then(profile => {
+          res.json(profile);
+        })
+        .catch(err => res.status(404).json(err));
+    });
+  }
+);
+
+//DELETE- api/profile/education/:edu_id
+//Delete education from profile
+//Access- private
+router.delete(
+  "/education/:edu_id",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    //SEARCH MONGO FOR USER PROFILE FIRST
+    Profile.findOne({ user: req.user.id }).then(profile => {
+      //GET REMOVE INDEX
+      const removeIndex = profile.education
+        .map(item => item.id)
+        .indexOf(req.params.edu_id);
+
+      //SPLICE OUT OF ARRAY
+      profile.education.splice(removeIndex, 1);
+
+      //SAVE
+      profile
+        .save()
+        .then(profile => {
+          res.json(profile);
+        })
+        .catch(err => res.status(404).json(err));
+    });
+  }
+);
+
+//DELETE- api/profile
+//Delete user and profile
+//Access- private
+router.delete(
+  "/",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    Profile.findOneAndDelete({ user: req.user.id }).then(() => {
+      User.findOneAndDelete({ _id: req.user.id }).then(() => {
+        res.json({ success: true });
+      });
     });
   }
 );
