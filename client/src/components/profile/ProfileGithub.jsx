@@ -7,8 +7,10 @@ class ProfileGithub extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      clientId: process.env.GITHUB_KEY || githubKeys.client_id, // ADD OR
-      clientSecret: process.env.GITHUB_SECRET || githubKeys.client_secret, //ADD OR
+      clientId: process.env.GITHUB_KEY,
+      //  || githubKeys.client_id, // ADD OR
+      clientSecret: process.env.GITHUB_SECRET,
+      // || githubKeys.client_secret,
       count: 5,
       sort: "created: asc",
       repos: []
