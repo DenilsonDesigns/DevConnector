@@ -2,13 +2,14 @@ import axios from "axios";
 
 import {
   GET_PROFILE,
+  GET_PROFILES,
   PROFILE_LOADING,
-  GET_ERRORS,
   CLEAR_CURRENT_PROFILE,
+  GET_ERRORS,
   SET_CURRENT_USER
 } from "./types";
 
-//GET CURRENT PROFILE
+// Get current profile
 export const getCurrentProfile = () => dispatch => {
   dispatch(setProfileLoading());
   axios
@@ -27,7 +28,26 @@ export const getCurrentProfile = () => dispatch => {
     );
 };
 
-//CREATE PROFILE
+// Get profile by handle
+export const getProfileByHandle = handle => dispatch => {
+  dispatch(setProfileLoading());
+  axios
+    .get(`/api/profile/handle/${handle}`)
+    .then(res =>
+      dispatch({
+        type: GET_PROFILE,
+        payload: res.data
+      })
+    )
+    .catch(err =>
+      dispatch({
+        type: GET_PROFILE,
+        payload: null
+      })
+    );
+};
+
+// Create Profile
 export const createProfile = (profileData, history) => dispatch => {
   axios
     .post("/api/profile", profileData)
@@ -40,83 +60,98 @@ export const createProfile = (profileData, history) => dispatch => {
     );
 };
 
-//ADD EXPERIENCE
+// Add experience
 export const addExperience = (expData, history) => dispatch => {
   axios
     .post("/api/profile/experience", expData)
-    .then(res => {
-      history.push("/dashboard");
-    })
-    .catch(err => {
+    .then(res => history.push("/dashboard"))
+    .catch(err =>
       dispatch({
         type: GET_ERRORS,
         payload: err.response.data
-      });
-    });
+      })
+    );
 };
 
-//ADD EDUCATION
+// Add education
 export const addEducation = (eduData, history) => dispatch => {
   axios
     .post("/api/profile/education", eduData)
-    .then(res => {
-      history.push("/dashboard");
-    })
-    .catch(err => {
+    .then(res => history.push("/dashboard"))
+    .catch(err =>
       dispatch({
         type: GET_ERRORS,
         payload: err.response.data
-      });
-    });
+      })
+    );
 };
 
-//DELETE EXPERIENC
+// Delete Experience
 export const deleteExperience = id => dispatch => {
   axios
     .delete(`/api/profile/experience/${id}`)
-    .then(res => {
+    .then(res =>
       dispatch({
         type: GET_PROFILE,
         payload: res.data
-      });
-    })
-    .catch(err => {
+      })
+    )
+    .catch(err =>
       dispatch({
         type: GET_ERRORS,
         payload: err.response.data
-      });
-    });
+      })
+    );
 };
 
-//DELETE EDUCATION
+// Delete Education
 export const deleteEducation = id => dispatch => {
   axios
     .delete(`/api/profile/education/${id}`)
-    .then(res => {
+    .then(res =>
       dispatch({
         type: GET_PROFILE,
         payload: res.data
-      });
-    })
-    .catch(err => {
+      })
+    )
+    .catch(err =>
       dispatch({
         type: GET_ERRORS,
         payload: err.response.data
-      });
-    });
+      })
+    );
 };
 
-//DELETE ACCOUNT & PROFILE
+// Get all profiles
+export const getProfiles = () => dispatch => {
+  dispatch(setProfileLoading());
+  axios
+    .get("/api/profile/all")
+    .then(res =>
+      dispatch({
+        type: GET_PROFILES,
+        payload: res.data
+      })
+    )
+    .catch(err =>
+      dispatch({
+        type: GET_PROFILES,
+        payload: null
+      })
+    );
+};
+
+// Delete account & profile
 export const deleteAccount = () => dispatch => {
-  if (window.confirm("Are you sure? This can NOT be reversed!")) {
+  if (window.confirm("Are you sure? This can NOT be undone!")) {
     axios
       .delete("/api/profile")
-      .then(res => {
+      .then(res =>
         dispatch({
           type: SET_CURRENT_USER,
           payload: {}
-        });
-      })
+        })
+      )
       .catch(err =>
         dispatch({
           type: GET_ERRORS,
@@ -126,14 +161,14 @@ export const deleteAccount = () => dispatch => {
   }
 };
 
-//PROFILE LOADING
+// Profile loading
 export const setProfileLoading = () => {
   return {
     type: PROFILE_LOADING
   };
 };
 
-//CLEAR PROFILE
+// Clear profile
 export const clearCurrentProfile = () => {
   return {
     type: CLEAR_CURRENT_PROFILE

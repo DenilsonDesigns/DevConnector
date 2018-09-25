@@ -2,4 +2,5 @@
 package-lock.json
 /config
 /client/node_modules
+/client/src/config/config.js
 /devconnector_theme
